@@ -26,7 +26,7 @@ bool WlanConnect::Init()
         }
     }
 
-    if(WiFi.status() != WL_CONNECTED) {
+    if(WiFi.status() == WL_CONNECTED) {
         Serial.println("");
         Serial.println("WiFi connected");
 
