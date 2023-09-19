@@ -49,10 +49,14 @@ void loop() {
   if(command.length() > 0) {
     Serial.println("Command: "  + command);
     if(command == "s") {
+      Serial.println(F("BT Scan running"));
       bleConnect->Scan();
       Serial.println(F("BT Scan finish"));
     }
-    
+    if(command[0] == 'c') {
+      byte index = atoi(command.substring(1).c_str());
+      bleConnect->ConnectSerial(index);
+    }
   }
 
   //delay(5000);

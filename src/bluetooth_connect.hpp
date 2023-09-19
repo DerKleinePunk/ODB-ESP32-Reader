@@ -10,6 +10,12 @@
 #include <BLEAddress.h>
 #include <vector>
 
+struct btDevice {
+    BTAddress address;
+    String  name;
+    bool classic;
+};
+
 class BluetoothConnect
 {
 private:
@@ -21,9 +27,9 @@ public:
     ~BluetoothConnect();
 
     void Scan();
-
+    void ConnectSerial(byte index);
     byte m_nCurrentDevice;
-    std::vector<BLEAddress> m_pAddresses;
+    std::vector<btDevice> m_pAddresses;
 };
 
 
