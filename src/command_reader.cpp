@@ -35,3 +35,20 @@ String CommandReader::GetCommand()
 
     return result;
 }
+
+String CommandReader::GetCommandTimeout(u_long timeOut)
+{
+    String result("");
+
+    //Todo Not Work after 50 Days run
+    u_long now = millis();
+    while ((unsigned long)(millis() - now) < timeOut )
+    {
+        result = GetCommand();
+        if(result.length() > 0) {
+            break;
+        }
+    }
+
+    return result;
+}

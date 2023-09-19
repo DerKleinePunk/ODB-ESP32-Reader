@@ -14,6 +14,7 @@ public:
     bool begin(Stream &stream);
 
     String GetCommand();
+    String GetCommandTimeout(u_long timeOut);
 };
 
 

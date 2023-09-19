@@ -1,4 +1,5 @@
 #include "bluetooth_connect.hpp"
+#include "command_reader.hpp"
 
 class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks
 {
@@ -53,6 +54,10 @@ void BluetoothConnect::Scan() {
         m_pBLEScan->setActiveScan(true); //active scan uses more power, but get results faster
     }
 
+    if(m_SerialBT.connected()) {
+      m_SerialBT.disconnect();
+    }
+
     m_pAddresses.clear();
     m_pBLEScan->start(m_nScanTime);
     BTScanResults* pResults = m_SerialBT.discover(m_nScanTime* 1000);//Scantime in ms
@@ -98,9 +103,24 @@ void BluetoothConnect::ConnectSerial(byte index) {
 
   Serial.println("Try Connect to " + m_pAddresses[index].name);
 
+  //Todo Make Configable
+  m_SerialBT.setPin("1234");
   m_SerialBT.connect(m_pAddresses[index].address);
   if(m_SerialBT.connected(m_nScanTime* 1000)) {
-    m_SerialBT.println("AT Z");
+    log_d("bt serial connected");
+    m_SerialBT.print("AT Z\r\n");
+    m_SerialBT.flush();
     
+    CommandReader commandReader;
+    commandReader.begin(m_SerialBT);
+    auto result = commandReader.GetCommandTimeout(m_nScanTime* 1000);
+    if(result == "AT Z") {
+      log_d("serial echo");
+      result = commandReader.GetCommandTimeout(m_nScanTime* 1000);
+    }
+    Serial.println("result " + result);
+
+  } else {
+    log_d("bt serial not conneted");
   }
 }

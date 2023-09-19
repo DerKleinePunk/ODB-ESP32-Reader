@@ -18,3 +18,5 @@ https://www.kai-morich.de/android/
 https://github.com/kai-morich/usb-serial-for-android-mik3y
 https://esp32-server.de/ibeacon-itag-praesenz-schalter/
 https://www.obd-2.de/stecker-belegungen.html
+
+[esp32-ble-server-how-to-use-gatt-services-for-battery-level-indication](https://circuitdigest.com/microcontroller-projects/esp32-ble-server-how-to-use-gatt-services-for-battery-level-indication)

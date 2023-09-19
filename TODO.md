@@ -1,0 +1,1 @@
+BT Scan not after conneted serialBT
