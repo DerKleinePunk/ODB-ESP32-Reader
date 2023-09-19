@@ -2,6 +2,8 @@
 
 copy config_sample.hpp to config.hpp and config your values
 
+## Serial Commands
+s -> Scan BT for devices
 
 ## Links / Helping Pages
 
