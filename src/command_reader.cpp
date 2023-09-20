@@ -9,24 +9,30 @@ CommandReader::~CommandReader()
 {
 }
 
-bool CommandReader::begin(Stream &stream)
+bool CommandReader::begin(Stream& stream)
 {
     _pInputStream = &stream;
     return true;
 }
 
-String CommandReader::GetCommand()
+std::vector<String> CommandReader::GetCommand()
 {
-    String result("");
+    std::vector<String> result;
 
-    while (_pInputStream->available() > 0) {
+    while(_pInputStream->available() > 0) {
         int input = _pInputStream->read();
         if(input == 13) {
+            log_d("<cr> found");
+            if(_readBufferPos == 0) continue;
             _readBuffer[_readBufferPos] = 0;
-            result = _readBuffer;
+            result.push_back(_readBuffer);
             _readBufferPos = 0;
-        } else if (input == 10) {
-            //ignore it
+        } else if(input == 10) {
+            // ignore it
+            log_d("<lf> found");
+        } else if(input < 32) {
+            // ignore it
+            log_d("<%d> found", input);
         } else {
             _readBuffer[_readBufferPos] = (char)input;
             _readBufferPos++;
@@ -36,16 +42,15 @@ String CommandReader::GetCommand()
     return result;
 }
 
-String CommandReader::GetCommandTimeout(u_long timeOut)
+std::vector<String> CommandReader::GetCommandTimeout(u_long timeOut)
 {
-    String result("");
+    std::vector<String> result;
 
-    //Todo Not Work after 50 Days run
+    // Todo Not Work after 50 Days run
     u_long now = millis();
-    while ((unsigned long)(millis() - now) < timeOut )
-    {
+    while((unsigned long)(millis() - now) < timeOut) {
         result = GetCommand();
-        if(result.length() > 0) {
+        if(!result.empty()) {
             break;
         }
     }

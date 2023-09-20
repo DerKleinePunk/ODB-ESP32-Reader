@@ -1,5 +1,6 @@
 #pragma once
 #include "Arduino.h"
+#include "vector"
 
 class CommandReader
 {
@@ -13,8 +14,8 @@ public:
 
     bool begin(Stream &stream);
 
-    String GetCommand();
-    String GetCommandTimeout(u_long timeOut);
+    std::vector<String> GetCommand();
+    std::vector<String> GetCommandTimeout(u_long timeOut);
 };
 
 
