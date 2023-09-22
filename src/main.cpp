@@ -22,6 +22,11 @@ WlanConnect wlan = WlanConnect(ssid, password);
 BluetoothConnect* bleConnect;
 CommandReader commandReader;
 
+void odbStateChanged(obd_pid_states pid, MotorState state) {
+    Serial.println(F("MotorState"));
+    Serial.printf("RPM: %f", state.rpm);
+}
+
 void setup()
 {
     Serial.begin(115200);
@@ -34,6 +39,7 @@ void setup()
 
     bleConnect = new BluetoothConnect();
     commandReader.begin(Serial);
+    bleConnect->ValueChangedCallback(odbStateChanged);
 }
 
 void loop()
@@ -45,7 +51,7 @@ void loop()
     }
 
     const auto commands = commandReader.GetCommand();
-    if(!commands.empty())
+    if(!commands.empty()) {
         for(const auto command : commands) {
             Serial.println("Command: " + command);
             if(command == "s") {
@@ -62,8 +68,9 @@ void loop()
             }
             if(command[0] == 'r') {
                 bleConnect->rpm();
+                bleConnect->kph();
             }
         }
-
-    // delay(5000);
+    }
+    bleConnect->loop();
 }

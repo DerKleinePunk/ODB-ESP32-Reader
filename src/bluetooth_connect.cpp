@@ -33,13 +33,34 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
     }
 };
 
+bool BluetoothConnect::AddPidIfNotExits(obd_pid_states pid)
+{
+    auto found = false;
+    for(auto i = 0; i < 20; i++) {
+        if(_obd_pid_list[i] == obd_pid_states::NOTHING) {
+            _obd_pid_list[i] = pid;
+            found = true;
+            break;
+        }
+        if(_obd_pid_list[i] == pid) {
+            found = true;
+            break;
+        }
+    }
+
+    return found;
+}
+
 BluetoothConnect::BluetoothConnect()
 {
     BLEDevice::init("ODB-ESP");
-    m_SerialBT.begin("ODB-ESP", true); // Bluetooth device name
-    m_pBLEScan = nullptr;
-    m_nScanTime = 5; // In seconds
-    m_nCurrentDevice = 0;
+    _SerialBT.begin("ODB-ESP", true); // Bluetooth device name
+    _pBLEScan = nullptr;
+    _nScanTime = 5; // In seconds
+    _current_obd_pid = obd_pid_states::NOTHING;
+    for(auto i = 0; i < 20; i++) {
+        _obd_pid_list[i] = obd_pid_states::NOTHING;
+    }
 }
 
 BluetoothConnect::~BluetoothConnect()
@@ -48,20 +69,20 @@ BluetoothConnect::~BluetoothConnect()
 
 void BluetoothConnect::Scan()
 {
-    if(m_pBLEScan == nullptr) {
-        m_pBLEScan = BLEDevice::getScan(); // create new scan
-        m_pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks(this));
-        m_pBLEScan->setActiveScan(true); // active scan uses more power, but get results faster
+    if(_pBLEScan == nullptr) {
+        _pBLEScan = BLEDevice::getScan(); // create new scan
+        _pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks(this));
+        _pBLEScan->setActiveScan(true); // active scan uses more power, but get results faster
     }
 
-    if(m_SerialBT.connected()) {
-        m_SerialBT.disconnect();
-        m_emlConnected = false;
+    if(_SerialBT.connected()) {
+        _SerialBT.disconnect();
+        _emlConnected = false;
     }
 
     m_pAddresses.clear();
-    m_pBLEScan->start(m_nScanTime);
-    BTScanResults* pResults = m_SerialBT.discover(m_nScanTime * 1000); // Scantime in ms
+    _pBLEScan->start(_nScanTime);
+    BTScanResults* pResults = _SerialBT.discover(_nScanTime * 1000); // Scantime in ms
     if(pResults) {
         for(int i = 0; i < pResults->getCount(); i++) {
             btDevice device;
@@ -105,32 +126,32 @@ void BluetoothConnect::ConnectSerial(byte index)
     Serial.println("Try Connect to " + m_pAddresses[index].name);
 
     // Todo Make Configable
-    m_SerialBT.setPin("1234");
-    m_SerialBT.connect(m_pAddresses[index].address);
-    if(m_SerialBT.connected(m_nScanTime * 1000)) {
+    _SerialBT.setPin("1234");
+    _SerialBT.connect(m_pAddresses[index].address);
+    if(_SerialBT.connected(_nScanTime * 1000)) {
         log_d("bt serial connected");
         // if(m_SerialBT.isReady(m_nScanTime * 1000)
-        m_SerialBT.print("AT Z\r\n");
-        m_SerialBT.flush();
+        _SerialBT.print("AT Z\r\n");
+        _SerialBT.flush();
 
         CommandReader commandReader;
-        commandReader.begin(m_SerialBT);
-        auto commands = commandReader.GetCommandTimeout(m_nScanTime * 1000);
+        commandReader.begin(_SerialBT);
+        auto commands = commandReader.GetCommandTimeout(_nScanTime * 1000);
         if(!commands.empty()) {
             for(const auto command : commands) {
                 log_d("result %s", command);
                 if(command.indexOf("ELM") > -1) {
-                    m_emlConnected = true;
+                    _emlConnected = true;
                 }
             }
         }
-        if(m_emlConnected) {
+        if(_emlConnected) {
             Serial.println("ODBII found");
-            if(m_ELMduino.begin(m_SerialBT, true, 2000)) {
+            if(_ELMduino.begin(_SerialBT, true, 4000)) {
                 Serial.println("connected to OBD scanner - Phase 2");
             } else {
                 Serial.println("failed to connect ODB Scanner");
-                m_emlConnected = false;
+                _emlConnected = false;
             }
         }
     } else {
@@ -140,9 +161,9 @@ void BluetoothConnect::ConnectSerial(byte index)
 
 void BluetoothConnect::Disconnect()
 {
-    m_emlConnected = false;
-    if(m_SerialBT.connected()) {
-        m_SerialBT.disconnect();
+    _emlConnected = false;
+    if(_SerialBT.connected()) {
+        _SerialBT.disconnect();
     }
     /*m_SerialBT.end();
     BLEDevice::init("ODB-ESP");
@@ -150,22 +171,97 @@ void BluetoothConnect::Disconnect()
     m_pBLEScan = nullptr;*/
 }
 
-float BluetoothConnect::rpm()
+void BluetoothConnect::ValueChangedCallback(ValueChangedEvent callback)
 {
-    if(!m_emlConnected) return 0.0;
+    _event = callback;
+}
 
-    auto rpm = m_ELMduino.rpm();
-    while(m_ELMduino.nb_rx_state != ELM_SUCCESS) {
-        if(m_ELMduino.nb_rx_state != ELM_GETTING_MSG) {
-            m_ELMduino.printError();
-            break;
+
+void BluetoothConnect::rpm()
+{
+    if(!_emlConnected) return;
+
+    if(_current_obd_pid == obd_pid_states::NOTHING) {
+        _current_obd_pid = obd_pid_states::RPM;
+    } else {
+        AddPidIfNotExits(obd_pid_states::RPM);
+    }
+}
+
+void BluetoothConnect::kph()
+{
+    if(!_emlConnected) return;
+
+    if(_current_obd_pid == obd_pid_states::NOTHING) {
+        _current_obd_pid = obd_pid_states::KPH;
+    } else {
+        AddPidIfNotExits(obd_pid_states::KPH);
+    }
+}
+
+void BluetoothConnect::oilTemp()
+{
+    if(!_emlConnected) return;
+
+    if(_current_obd_pid == obd_pid_states::NOTHING) {
+        _current_obd_pid = obd_pid_states::OILTEMP;
+    } else {
+        AddPidIfNotExits(obd_pid_states::OILTEMP);
+    }
+}
+
+void BluetoothConnect::loop()
+{
+    if(!_emlConnected) return;
+
+    if(_current_obd_pid == obd_pid_states::NOTHING) return;
+
+    switch(_current_obd_pid) {
+    case obd_pid_states::RPM:
+        _motor_State.rpm = _ELMduino.rpm();
+        if(_ELMduino.nb_rx_state == ELM_SUCCESS) {
+            if(_event != nullptr) {
+                _event(_current_obd_pid, _motor_State);
+            }
+            _current_obd_pid = obd_pid_states::NOTHING;
         }
-        rpm = m_ELMduino.rpm();
+        break;
+    case obd_pid_states::KPH:
+        _motor_State.rpm = _ELMduino.kph();
+        if(_ELMduino.nb_rx_state == ELM_SUCCESS) {
+            if(_event != nullptr) {
+                _event(_current_obd_pid, _motor_State);
+            }
+            _current_obd_pid = obd_pid_states::NOTHING;
+        }
+        break;
+    case obd_pid_states::OILTEMP:
+        _motor_State.rpm = _ELMduino.oilTemp();
+        if(_ELMduino.nb_rx_state == ELM_SUCCESS) {
+            if(_event != nullptr) {
+                _event(_current_obd_pid, _motor_State);
+            }
+            _current_obd_pid = obd_pid_states::NOTHING;
+        }
+        break;
+    default:
+        log_e("_current_obd_pid not implemented");
+        break;
     }
 
-    if(m_ELMduino.nb_rx_state == ELM_SUCCESS) {
-      rpm = m_ELMduino.rpm();
+    if(_ELMduino.nb_rx_state != ELM_GETTING_MSG) {
+        _ELMduino.printError();
+        _current_obd_pid = obd_pid_states::NOTHING;
     }
 
-    return rpm;
+    if(_ELMduino.nb_rx_state == ELM_SUCCESS) {
+        if(_obd_pid_list[0] != obd_pid_states::NOTHING) {
+            _current_obd_pid = _obd_pid_list[0];
+
+            for(auto i = 0; i < 19; i++) {
+                _obd_pid_list[i] == _obd_pid_list[i + 1];
+            }
+            _obd_pid_list[19] = obd_pid_states::NOTHING;
+        }
+    }
 }
