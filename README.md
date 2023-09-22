@@ -20,3 +20,7 @@ https://esp32-server.de/ibeacon-itag-praesenz-schalter/
 https://www.obd-2.de/stecker-belegungen.html
 
 [esp32-ble-server-how-to-use-gatt-services-for-battery-level-indication](https://circuitdigest.com/microcontroller-projects/esp32-ble-server-how-to-use-gatt-services-for-battery-level-indication)
+
+[OBD-II_PIDs](https://en.wikipedia.org/wiki/OBD-II_PIDs)
+
+[programmierer-tips](https://www.obd-2.de/programmierer-tips.html)
