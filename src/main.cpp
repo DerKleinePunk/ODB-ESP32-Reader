@@ -9,18 +9,20 @@
 #error Serial Bluetooth not available or not enabled. It is only available for the ESP32 chip.
 #endif
 
-#include "bluetooth_connect.hpp"
+#include "elm327_connect.hpp"
 #include "command_reader.hpp"
 #include "config.hpp"
 #include "wlan_connect.hpp"
+#include "mqtt_connect.hpp"
 
 #ifndef LED_BUILTIN
 #define LED_BUILTIN 4
 #endif
 
 WlanConnect wlan = WlanConnect(ssid, password);
-BluetoothConnect* bleConnect;
+Elm327Connect* elm327Connect;
 CommandReader commandReader;
+MqttConnect mqttConnect;
 
 void odbStateChanged(obd_pid_states pid, MotorState state) {
     Serial.println(F("MotorState"));
@@ -37,9 +39,9 @@ void setup()
 
     wlan.Init();
 
-    bleConnect = new BluetoothConnect();
+    elm327Connect = new Elm327Connect();
     commandReader.begin(Serial);
-    bleConnect->ValueChangedCallback(odbStateChanged);
+    elm327Connect->ValueChangedCallback(odbStateChanged);
 }
 
 void loop()
@@ -56,21 +58,24 @@ void loop()
             Serial.println("Command: " + command);
             if(command == "s") {
                 Serial.println(F("BT Scan running"));
-                bleConnect->Scan();
+                elm327Connect->Scan();
                 Serial.println(F("BT Scan finish"));
             }
             if(command[0] == 'c') {
                 byte index = atoi(command.substring(1).c_str());
-                bleConnect->ConnectSerial(index);
+                elm327Connect->ConnectSerial(index);
             }
             if(command[0] == 'd') {
-                bleConnect->Disconnect();
+                elm327Connect->Disconnect();
             }
             if(command[0] == 'r') {
-                bleConnect->rpm();
-                bleConnect->kph();
+                elm327Connect->rpm();
+                elm327Connect->kph();
+            }
+            if(command == "mqtt") {
+                mqttConnect.Search();
             }
         }
     }
-    bleConnect->loop();
+    elm327Connect->loop();
 }

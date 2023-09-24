@@ -45,6 +45,7 @@ bool WlanConnect::Check()
         return true;
     }
 
+    //todo Reconnect
     Serial.println("WiFi not connected!!");
     
     return false;

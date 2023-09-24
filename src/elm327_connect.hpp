@@ -28,7 +28,7 @@ struct MotorState {
 };
 
 
-class BluetoothConnect
+class Elm327Connect
 {
     using ValueChangedEvent = void (*)(obd_pid_states, MotorState);
 
@@ -44,8 +44,8 @@ class BluetoothConnect
     MotorState _motor_State;
     bool AddPidIfNotExits(obd_pid_states pid);
   public:
-    BluetoothConnect();
-    ~BluetoothConnect();
+    Elm327Connect();
+    ~Elm327Connect();
 
     std::vector<btDevice> m_pAddresses;
 

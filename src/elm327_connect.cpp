@@ -1,13 +1,13 @@
-#include "bluetooth_connect.hpp"
+#include "elm327_connect.hpp"
 
 #include "command_reader.hpp"
 
 class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
 {
-    BluetoothConnect* _parent;
+    Elm327Connect* _parent;
 
   public:
-    MyAdvertisedDeviceCallbacks(BluetoothConnect* parent)
+    MyAdvertisedDeviceCallbacks(Elm327Connect* parent)
     {
         _parent = parent;
     }
@@ -33,7 +33,7 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
     }
 };
 
-bool BluetoothConnect::AddPidIfNotExits(obd_pid_states pid)
+bool Elm327Connect::AddPidIfNotExits(obd_pid_states pid)
 {
     auto found = false;
     for(auto i = 0; i < 20; i++) {
@@ -51,7 +51,7 @@ bool BluetoothConnect::AddPidIfNotExits(obd_pid_states pid)
     return found;
 }
 
-BluetoothConnect::BluetoothConnect()
+Elm327Connect::Elm327Connect()
 {
     BLEDevice::init("ODB-ESP");
     _SerialBT.begin("ODB-ESP", true); // Bluetooth device name
@@ -63,11 +63,11 @@ BluetoothConnect::BluetoothConnect()
     }
 }
 
-BluetoothConnect::~BluetoothConnect()
+Elm327Connect::~Elm327Connect()
 {
 }
 
-void BluetoothConnect::Scan()
+void Elm327Connect::Scan()
 {
     if(_pBLEScan == nullptr) {
         _pBLEScan = BLEDevice::getScan(); // create new scan
@@ -111,7 +111,7 @@ void BluetoothConnect::Scan()
     }
 }
 
-void BluetoothConnect::ConnectSerial(byte index)
+void Elm327Connect::ConnectSerial(byte index)
 {
     if(index >= m_pAddresses.size()) {
         log_d("index not in Array");
@@ -159,7 +159,7 @@ void BluetoothConnect::ConnectSerial(byte index)
     }
 }
 
-void BluetoothConnect::Disconnect()
+void Elm327Connect::Disconnect()
 {
     _emlConnected = false;
     if(_SerialBT.connected()) {
@@ -171,13 +171,13 @@ void BluetoothConnect::Disconnect()
     m_pBLEScan = nullptr;*/
 }
 
-void BluetoothConnect::ValueChangedCallback(ValueChangedEvent callback)
+void Elm327Connect::ValueChangedCallback(ValueChangedEvent callback)
 {
     _event = callback;
 }
 
 
-void BluetoothConnect::rpm()
+void Elm327Connect::rpm()
 {
     if(!_emlConnected) return;
 
@@ -188,7 +188,7 @@ void BluetoothConnect::rpm()
     }
 }
 
-void BluetoothConnect::kph()
+void Elm327Connect::kph()
 {
     if(!_emlConnected) return;
 
@@ -199,7 +199,7 @@ void BluetoothConnect::kph()
     }
 }
 
-void BluetoothConnect::oilTemp()
+void Elm327Connect::oilTemp()
 {
     if(!_emlConnected) return;
 
@@ -210,7 +210,7 @@ void BluetoothConnect::oilTemp()
     }
 }
 
-void BluetoothConnect::loop()
+void Elm327Connect::loop()
 {
     if(!_emlConnected) return;
 

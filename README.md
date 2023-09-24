@@ -10,6 +10,7 @@ Send Command to ESP via Serial Console
 s -> Scan BT for devices
 c<index> connect Serial BT Device c2 -> Connect 2 Device from last scan.
 r -> read rpm and kph (km/h)
+mqtt -> search for mqtt
 ```
 
 ## Troubleshooting
@@ -28,3 +29,5 @@ r -> read rpm and kph (km/h)
 + [esp32-ble-server-how-to-use-gatt-services-for-battery-level-indication](https://circuitdigest.com/microcontroller-projects/esp32-ble-server-how-to-use-gatt-services-for-battery-level-indication)
 + [OBD-II_PIDs](https://en.wikipedia.org/wiki/OBD-II_PIDs)
 + [programmierer-tips](https://www.obd-2.de/programmierer-tips.html)
++ [HA mqtt-discovery](https://www.home-assistant.io/integrations/mqtt#mqtt-discovery)
++ [avahi mosquitto](https://github.com/arendst/Tasmota/discussions/11403)
