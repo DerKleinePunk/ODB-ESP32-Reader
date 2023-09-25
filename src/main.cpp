@@ -19,6 +19,26 @@
 #define LED_BUILTIN 4
 #endif
 
+/* Returns a semi-unique id for the device. The id is based
+*  on part of a MAC address or chip ID so it won't be 
+*  globally unique. */
+uint64_t GetDeviceId()
+{
+#if defined(ARDUINO_ARCH_ESP32)
+  return ESP.getEfuseMac();
+#else
+  return ESP.getChipId();
+#endif
+}
+
+/* Append a semi-unique id to the name template */
+String MakeMine(const char *NameTemplate)
+{
+  uint16_t uChipId = GetDeviceId();
+  String Result = String(NameTemplate) + String(uChipId, HEX);
+  return Result;
+}
+
 WlanConnect wlan = WlanConnect(ssid, password);
 Elm327Connect* elm327Connect;
 CommandReader commandReader;
@@ -26,7 +46,21 @@ MqttConnect mqttConnect;
 
 void odbStateChanged(obd_pid_states pid, MotorState state) {
     Serial.println(F("MotorState"));
-    Serial.printf("RPM: %f", state.rpm);
+    switch (pid)
+    {
+    case obd_pid_states::RPM:
+        Serial.printf("RPM: %f", state.rpm);
+        break;
+    case obd_pid_states::KPH:
+        Serial.printf("KPH: %f", state.kph);
+        break;
+    case obd_pid_states::OILTEMP:
+        Serial.printf("OIL TEMP: %f", state.oilTemp);
+        break;
+    default:
+        log_e("mission implementation for pid %d",pid);
+    }
+   
 }
 
 void setup()
@@ -42,6 +76,7 @@ void setup()
     elm327Connect = new Elm327Connect();
     commandReader.begin(Serial);
     elm327Connect->ValueChangedCallback(odbStateChanged);
+    mqttConnect.begin(wlan);
 }
 
 void loop()
@@ -71,6 +106,7 @@ void loop()
             if(command[0] == 'r') {
                 elm327Connect->rpm();
                 elm327Connect->kph();
+                elm327Connect->oilTemp();
             }
             if(command == "mqtt") {
                 mqttConnect.Search();

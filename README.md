@@ -31,3 +31,12 @@ mqtt -> search for mqtt
 + [programmierer-tips](https://www.obd-2.de/programmierer-tips.html)
 + [HA mqtt-discovery](https://www.home-assistant.io/integrations/mqtt#mqtt-discovery)
 + [avahi mosquitto](https://github.com/arendst/Tasmota/discussions/11403)
++ [mdns for esp](https://www.megunolink.com/articles/wireless/find-esp32-esp8266-ip-address-with-mdns/)
++ [arduino-home-assistant](https://github.com/dawidchyrzynski/arduino-home-assistant)
++ [arduino-mqtt](https://github.com/256dpi/arduino-mqtt)
+
+## Remindings
+ pio lib install "256dpi/MQTT"
+ pio lib install "256dpi/arduino-mqtt"
+ pio lib install "PubSubClient"
+ pio pkg install -l "256dpi/arduino-mqtt" -d. -pespressif32 

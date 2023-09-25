@@ -1,17 +1,20 @@
 #pragma once
 
 #include <ESPmDNS.h>
+#include <MQTT.h>
 
 class MqttConnect
 {
 private:
-    /* data */
+    IPAddress _ipAdress;
 public:
     MqttConnect();
     ~MqttConnect();
 
+    void begin(Client& _client);
     void Search();
-    bool Connected();
+    bool Connect(String& deviceId);
+    bool loop();
 };
 
 

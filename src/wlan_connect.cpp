@@ -50,3 +50,66 @@ bool WlanConnect::Check()
     
     return false;
 }
+
+//Client Interface
+int WlanConnect::connect(IPAddress ip, uint16_t port) {
+    Check();
+    return _netClient.connect(ip, port);
+}
+
+int WlanConnect::connect(const char *host, uint16_t port) {
+    Check();
+    return _netClient.connect(host, port);
+}
+
+size_t WlanConnect::write(uint8_t buffer) {
+    Check();
+    return _netClient.write(buffer);
+}
+
+size_t WlanConnect::write(const uint8_t *buf, size_t size)
+{
+    Check();
+    return _netClient.write(buf,size);
+}
+
+int WlanConnect::available(){
+    Check();
+    return _netClient.available();
+}
+
+ int WlanConnect::read()
+ {
+    Check();
+    return _netClient.read();
+ }
+
+ int WlanConnect::read(uint8_t *buf, size_t size)
+ {
+    Check();
+    return _netClient.read(buf, size);
+ }
+
+ int WlanConnect::peek()
+ {
+    Check();
+    return _netClient.peek();
+ }
+
+void WlanConnect::flush()
+{
+    Check();
+    _netClient.flush();
+}
+
+void WlanConnect::stop()
+{
+    Check();
+    _netClient.stop();
+}
+
+uint8_t  WlanConnect::connected()
+{
+    Check();
+    return _netClient.connected();
+}
