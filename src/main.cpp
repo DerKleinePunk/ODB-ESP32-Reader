@@ -14,6 +14,7 @@
 #include "config.hpp"
 #include "wlan_connect.hpp"
 #include "mqtt_connect.hpp"
+#include "HA/sensor.hpp"
 
 #ifndef LED_BUILTIN
 #define LED_BUILTIN 4
@@ -34,8 +35,7 @@ uint64_t GetDeviceId()
 /* Append a semi-unique id to the name template */
 String MakeMine(const char *NameTemplate)
 {
-  uint16_t uChipId = GetDeviceId();
-  String Result = String(NameTemplate) + String(uChipId, HEX);
+  String Result = String(NameTemplate) + String(GetDeviceId(), HEX);
   return Result;
 }
 
@@ -81,8 +81,6 @@ void setup()
 
 void loop()
 {
-    // put your main code here, to run repeatedly:
-    // Serial.println(F("Loop"));
 
     if(wlan.Check()) {
     }
@@ -110,6 +108,21 @@ void loop()
             }
             if(command == "mqtt") {
                 mqttConnect.Search();
+            }
+            if(command == "light") {
+                digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+            }
+            if(command == "t1") {
+                HA::sensor sensor("ODBII", String(GetDeviceId(), HEX).c_str());
+                HA::device lightDevice("LIGHT", HA::device_types::SWITCH);
+                
+                sensor.addDevice(lightDevice);
+
+                for(const auto entry : sensor.getConfigJson()) {
+                    Serial.println(entry.topic.c_str());
+                    Serial.println(entry.payload.c_str());
+                    mqttConnect.publish(entry.topic, entry.payload);
+                }
             }
         }
     }

@@ -65,3 +65,13 @@ bool MqttConnect::loop()
 {
     return client.loop();
 }
+
+bool MqttConnect::publish(const std::string& topic, const std::string& payload)
+{
+    if(!client.connected()) {
+        log_e("mqtt not connected");
+        return false;
+    }
+
+    return client.publish(topic.c_str(), payload.c_str());
+}

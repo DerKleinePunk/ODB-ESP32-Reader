@@ -11,6 +11,7 @@ s -> Scan BT for devices
 c<index> connect Serial BT Device c2 -> Connect 2 Device from last scan.
 r -> read rpm and kph (km/h)
 mqtt -> search for mqtt
+light -> Switch State from LED_BUILTIN
 ```
 
 ## Troubleshooting
@@ -34,6 +35,7 @@ mqtt -> search for mqtt
 + [mdns for esp](https://www.megunolink.com/articles/wireless/find-esp32-esp8266-ip-address-with-mdns/)
 + [arduino-home-assistant](https://github.com/dawidchyrzynski/arduino-home-assistant)
 + [arduino-mqtt](https://github.com/256dpi/arduino-mqtt)
++ [DnWiFiDoorLock](https://github.com/MacDada/DnWiFiDoorLock)
 
 ## Remindings
  pio lib install "256dpi/MQTT"

@@ -5,33 +5,41 @@
 class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
 {
     Elm327Connect* _parent;
+    
+    // NOTE: disable copy constructor and assignment operator
+    MyAdvertisedDeviceCallbacks(const MyAdvertisedDeviceCallbacks&) = delete;
+    MyAdvertisedDeviceCallbacks& operator=(const MyAdvertisedDeviceCallbacks&) & = delete;
 
   public:
-    MyAdvertisedDeviceCallbacks(Elm327Connect* parent)
+    explicit MyAdvertisedDeviceCallbacks(Elm327Connect* parent)
     {
         _parent = parent;
     }
 
-    void onResult(BLEAdvertisedDevice advertisedDevice) // passiert wenn BLE Device ( beacon ) gefunden wurde
-    {
-        btDevice device;
-        // Serial.print(advertisedDevice.getAddress().toString().c_str());
-        if(advertisedDevice.haveName()) {
-            device.name = advertisedDevice.getName().c_str();
-        } else {
-            device.name = F("not defined");
-        }
-        if(advertisedDevice.haveManufacturerData()) {
-            /*Serial.print(" - ");
-            char *pHex = BLEUtils::buildHexData(nullptr, (uint8_t*)advertisedDevice.getManufacturerData().data(),
-            advertisedDevice.getManufacturerData().length()); Serial.print(pHex); free(pHex);*/
-        }
-
-        device.address = BTAddress(*(advertisedDevice.getAddress().getNative()));
-        device.classic = false;
-        _parent->m_pAddresses.push_back(device);
-    }
+    void onResult(BLEAdvertisedDevice advertisedDevice) override;
 };
+
+// passiert wenn BLE Device ( beacon ) gefunden wurde
+void MyAdvertisedDeviceCallbacks::onResult(BLEAdvertisedDevice advertisedDevice) 
+{
+    btDevice device;
+    // Serial.print(advertisedDevice.getAddress().toString().c_str());
+    if(advertisedDevice.haveName()) {
+        device.name = advertisedDevice.getName().c_str();
+    } else {
+        device.name = F("not defined");
+    }
+    if(advertisedDevice.haveManufacturerData()) {
+        /*Serial.print(" - ");
+        char *pHex = BLEUtils::buildHexData(nullptr, (uint8_t*)advertisedDevice.getManufacturerData().data(),
+        advertisedDevice.getManufacturerData().length()); Serial.print(pHex); free(pHex);*/
+    }
+
+    device.address = BTAddress(*(advertisedDevice.getAddress().getNative()));
+    device.classic = false;
+    _parent->m_pAddresses.push_back(device);
+}
+
 
 bool Elm327Connect::AddPidIfNotExits(obd_pid_states pid)
 {
@@ -51,11 +59,10 @@ bool Elm327Connect::AddPidIfNotExits(obd_pid_states pid)
     return found;
 }
 
-Elm327Connect::Elm327Connect()
+Elm327Connect::Elm327Connect() : _emlConnected(false), _pBLEScan(nullptr), _event(nullptr)
 {
     BLEDevice::init("ODB-ESP");
     _SerialBT.begin("ODB-ESP", true); // Bluetooth device name
-    _pBLEScan = nullptr;
     _nScanTime = 5; // In seconds
     _current_obd_pid = obd_pid_states::NOTHING;
     for(auto i = 0; i < 20; i++) {

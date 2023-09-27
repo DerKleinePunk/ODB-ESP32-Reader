@@ -15,6 +15,7 @@ public:
     void Search();
     bool Connect(String& deviceId);
     bool loop();
+    bool publish(const std::string& topic, const std::string& payload);
 };
 
 
