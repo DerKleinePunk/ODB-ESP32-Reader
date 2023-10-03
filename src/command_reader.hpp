@@ -7,7 +7,7 @@ class CommandReader
 private:
     Stream* _pInputStream;
     char _readBuffer[30];
-    byte _readBufferPos = 0;
+    byte _readBufferPos;
 public:
     CommandReader(/* args */);
     ~CommandReader();

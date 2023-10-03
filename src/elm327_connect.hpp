@@ -24,6 +24,11 @@ struct btDevice {
 };
 
 struct MotorState {
+    MotorState() {
+        rpm = -1.0;
+        kph = -1;
+        oilTemp = -1.0;
+    }
     float rpm;
     int32_t kph;
     float oilTemp;

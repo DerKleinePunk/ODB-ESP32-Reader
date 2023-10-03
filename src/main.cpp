@@ -46,7 +46,7 @@ WlanConnect wlan = WlanConnect(ssid, password);
 Elm327Connect* elm327Connect;
 CommandReader commandReader;
 
-#ifdef MQTT_ENBALED
+#ifdef MQTT_ENABLED
     MqttConnect mqttConnect;
 #endif
 
@@ -82,7 +82,7 @@ void setup()
     elm327Connect = new Elm327Connect();
     commandReader.begin(Serial);
     elm327Connect->ValueChangedCallback(odbStateChanged);
-#ifdef MQTT_ENBALED
+#ifdef MQTT_ENABLED
     mqttConnect.begin(wlan);
 #endif
 }
@@ -115,7 +115,7 @@ void loop()
                 elm327Connect->oilTemp();
             }
             if(command == "mqtt") {
-#ifdef MQTT_ENBALED
+#ifdef MQTT_ENABLED
                 mqttConnect.Search();
 #else
        Serial.println(F("No MQTT"));
@@ -125,7 +125,7 @@ void loop()
                 digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
             }
             if(command == "t1") {
-#ifdef MQTT_ENBALED
+#ifdef MQTT_ENABLED
                 HA::sensor sensor("ODBII", String(GetDeviceId(), HEX).c_str());
                 HA::device lightDevice("LIGHT", HA::device_types::SWITCH);
                 

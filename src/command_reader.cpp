@@ -1,8 +1,10 @@
 #include "command_reader.hpp"
 
-CommandReader::CommandReader(/* args */)
+CommandReader::CommandReader(/* args */):
+    _pInputStream(nullptr),
+    _readBuffer{0},
+    _readBufferPos(0)
 {
-    _readBufferPos = 0;
 }
 
 CommandReader::~CommandReader()

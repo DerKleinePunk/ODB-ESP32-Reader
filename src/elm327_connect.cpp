@@ -64,7 +64,9 @@ Elm327Connect::Elm327Connect() :
     _pBLEScan(nullptr), 
 #endif
     _emlConnected(false), 
-    _event(nullptr)
+    _event(nullptr),
+    _ELMduino(),
+    _motor_State()
 {    
 #ifdef BLE_ENABLED  
     BLEDevice::init("ODB-ESP");
