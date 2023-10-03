@@ -1,9 +1,6 @@
+#ifdef MQTT_ENABLED
+
 #include "device.hpp"
-
-#include <ArduinoJson.h>
-
-#include <sstream> // std::stringstream, std::stringbuf
-
 
 namespace HA
 {
@@ -62,3 +59,5 @@ std::string device::getConfigJson(const std::string& treeName, const std::string
     return ss.str();
 }
 } // namespace HA
+
+#endif

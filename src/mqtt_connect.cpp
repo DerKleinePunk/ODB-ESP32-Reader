@@ -1,3 +1,5 @@
+#ifdef MQTT_ENABLED
+
 #include "mqtt_connect.hpp"
 
 MQTTClient client;
@@ -66,6 +68,10 @@ bool MqttConnect::loop()
     return client.loop();
 }
 
+/// @brief send payload to mqtt
+/// @param topic 
+/// @param payload 
+/// @return payload sendet
 bool MqttConnect::publish(const std::string& topic, const std::string& payload)
 {
     if(!client.connected()) {
@@ -75,3 +81,5 @@ bool MqttConnect::publish(const std::string& topic, const std::string& payload)
 
     return client.publish(topic.c_str(), payload.c_str());
 }
+
+#endif

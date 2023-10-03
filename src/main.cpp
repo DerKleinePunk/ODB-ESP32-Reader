@@ -13,8 +13,11 @@
 #include "command_reader.hpp"
 #include "config.hpp"
 #include "wlan_connect.hpp"
-#include "mqtt_connect.hpp"
-#include "HA/sensor.hpp"
+#ifdef MQTT_ENBALED
+    #include "mqtt_connect.hpp"
+    #include "HA/sensor.hpp"
+#endif
+
 
 #ifndef LED_BUILTIN
 #define LED_BUILTIN 4
@@ -42,7 +45,10 @@ String MakeMine(const char *NameTemplate)
 WlanConnect wlan = WlanConnect(ssid, password);
 Elm327Connect* elm327Connect;
 CommandReader commandReader;
-MqttConnect mqttConnect;
+
+#ifdef MQTT_ENBALED
+    MqttConnect mqttConnect;
+#endif
 
 void odbStateChanged(obd_pid_states pid, MotorState state) {
     Serial.println(F("MotorState"));
@@ -76,7 +82,9 @@ void setup()
     elm327Connect = new Elm327Connect();
     commandReader.begin(Serial);
     elm327Connect->ValueChangedCallback(odbStateChanged);
+#ifdef MQTT_ENBALED
     mqttConnect.begin(wlan);
+#endif
 }
 
 void loop()
@@ -107,12 +115,17 @@ void loop()
                 elm327Connect->oilTemp();
             }
             if(command == "mqtt") {
+#ifdef MQTT_ENBALED
                 mqttConnect.Search();
+#else
+       Serial.println(F("No MQTT"));
+#endif
             }
             if(command == "light") {
                 digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
             }
             if(command == "t1") {
+#ifdef MQTT_ENBALED
                 HA::sensor sensor("ODBII", String(GetDeviceId(), HEX).c_str());
                 HA::device lightDevice("LIGHT", HA::device_types::SWITCH);
                 
@@ -121,8 +134,10 @@ void loop()
                 for(const auto entry : sensor.getConfigJson()) {
                     Serial.println(entry.topic.c_str());
                     Serial.println(entry.payload.c_str());
+
                     mqttConnect.publish(entry.topic, entry.payload);
                 }
+#endif
             }
         }
     }

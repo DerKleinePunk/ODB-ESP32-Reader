@@ -1,6 +1,10 @@
 #pragma once
 
+#include <ArduinoJson.h>
 #include <string>
+#include <sstream>
+
+
 
 namespace HA {
     enum struct device_types { TEMPERATURE, HUMIDITY, BINARY_SENSOR, SWITCH };

@@ -1,3 +1,5 @@
+#ifdef MQTT_ENABLED
+
 #include "sensor.hpp"
 
 namespace HA
@@ -31,5 +33,6 @@ std::vector<mqttValue> sensor::getConfigJson()
 
     return result;
 }
-
 } // namespace HA
+
+#endif

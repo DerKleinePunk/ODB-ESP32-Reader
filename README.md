@@ -36,6 +36,7 @@ light -> Switch State from LED_BUILTIN
 + [arduino-home-assistant](https://github.com/dawidchyrzynski/arduino-home-assistant)
 + [arduino-mqtt](https://github.com/256dpi/arduino-mqtt)
 + [DnWiFiDoorLock](https://github.com/MacDada/DnWiFiDoorLock)
++ [platformio-version-increment](https://community.platformio.org/t/platformio-version-increment/13945/21)
 
 ## Remindings
  pio lib install "256dpi/MQTT"

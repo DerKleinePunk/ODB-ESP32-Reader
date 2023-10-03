@@ -1,7 +1,7 @@
 #include "elm327_connect.hpp"
-
 #include "command_reader.hpp"
 
+#ifdef BLE_ENABLED    
 class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
 {
     Elm327Connect* _parent;
@@ -39,7 +39,7 @@ void MyAdvertisedDeviceCallbacks::onResult(BLEAdvertisedDevice advertisedDevice)
     device.classic = false;
     _parent->m_pAddresses.push_back(device);
 }
-
+#endif
 
 bool Elm327Connect::AddPidIfNotExits(obd_pid_states pid)
 {
@@ -59,9 +59,16 @@ bool Elm327Connect::AddPidIfNotExits(obd_pid_states pid)
     return found;
 }
 
-Elm327Connect::Elm327Connect() : _emlConnected(false), _pBLEScan(nullptr), _event(nullptr)
-{
+Elm327Connect::Elm327Connect() : 
+#ifdef BLE_ENABLED    
+    _pBLEScan(nullptr), 
+#endif
+    _emlConnected(false), 
+    _event(nullptr)
+{    
+#ifdef BLE_ENABLED  
     BLEDevice::init("ODB-ESP");
+#endif
     _SerialBT.begin("ODB-ESP", true); // Bluetooth device name
     _nScanTime = 5; // In seconds
     _current_obd_pid = obd_pid_states::NOTHING;
@@ -76,19 +83,22 @@ Elm327Connect::~Elm327Connect()
 
 void Elm327Connect::Scan()
 {
+#ifdef BLE_ENABLED  
     if(_pBLEScan == nullptr) {
         _pBLEScan = BLEDevice::getScan(); // create new scan
         _pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks(this));
         _pBLEScan->setActiveScan(true); // active scan uses more power, but get results faster
     }
-
+#endif
     if(_SerialBT.connected()) {
         _SerialBT.disconnect();
         _emlConnected = false;
     }
 
     m_pAddresses.clear();
+#ifdef BLE_ENABLED
     _pBLEScan->start(_nScanTime);
+#endif
     BTScanResults* pResults = _SerialBT.discover(_nScanTime * 1000); // Scantime in ms
     if(pResults) {
         for(int i = 0; i < pResults->getCount(); i++) {

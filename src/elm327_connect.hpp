@@ -3,11 +3,13 @@
 #include <BluetoothSerial.h>
 // https://esp32-server.de/ibeacon-itag-praesenz-schalter/
 
+#ifdef BLE_ENABLED
 #include <BLEAddress.h>
 #include <BLEAdvertisedDevice.h>
 #include <BLEDevice.h>
 #include <BLEScan.h>
 #include <BLEUtils.h>
+#endif
 
 #include <vector>
 
@@ -33,8 +35,10 @@ class Elm327Connect
     using ValueChangedEvent = void (*)(obd_pid_states, MotorState);
 
   private:
+#ifdef BLE_ENABLED
     BLEScan* _pBLEScan;
-    u_int32_t _nScanTime;
+#endif
+    uint32_t _nScanTime;
     BluetoothSerial _SerialBT;
     bool _emlConnected;
     ELM327 _ELMduino;
@@ -43,6 +47,7 @@ class Elm327Connect
     ValueChangedEvent _event;
     MotorState _motor_State;
     bool AddPidIfNotExits(obd_pid_states pid);
+
   public:
     Elm327Connect();
     ~Elm327Connect();
