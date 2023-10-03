@@ -13,7 +13,7 @@
 #include "command_reader.hpp"
 #include "config.hpp"
 #include "wlan_connect.hpp"
-#ifdef MQTT_ENBALED
+#ifdef MQTT_ENABLED
     #include "mqtt_connect.hpp"
     #include "HA/sensor.hpp"
 #endif
