@@ -195,6 +195,39 @@ void Elm327Connect::ValueChangedCallback(ValueChangedEvent callback)
     _event = callback;
 }
 
+void Elm327Connect::coolantTemp()
+{
+    if(!_emlConnected) return;
+
+    if(_current_obd_pid == obd_pid_states::NOTHING) {
+        _current_obd_pid = obd_pid_states::COOLANT;
+    }
+    
+    AddPidIfNotExits(obd_pid_states::COOLANT);
+}
+
+
+void Elm327Connect::oilTemp()
+{
+    if(!_emlConnected) return;
+
+    if(_current_obd_pid == obd_pid_states::NOTHING) {
+        _current_obd_pid = obd_pid_states::OILTEMP;
+    }
+    
+    AddPidIfNotExits(obd_pid_states::OILTEMP);
+}
+
+void Elm327Connect::intakeAir()
+{
+    if(!_emlConnected) return;
+
+    if(_current_obd_pid == obd_pid_states::NOTHING) {
+        _current_obd_pid = obd_pid_states::INTAKE_AIR;
+    }
+    
+    AddPidIfNotExits(obd_pid_states::INTAKE_AIR);
+}
 
 void Elm327Connect::rpm()
 {
@@ -202,9 +235,9 @@ void Elm327Connect::rpm()
 
     if(_current_obd_pid == obd_pid_states::NOTHING) {
         _current_obd_pid = obd_pid_states::RPM;
-    } else {
-        AddPidIfNotExits(obd_pid_states::RPM);
     }
+
+    AddPidIfNotExits(obd_pid_states::RPM);
 }
 
 void Elm327Connect::kph()
@@ -213,20 +246,9 @@ void Elm327Connect::kph()
 
     if(_current_obd_pid == obd_pid_states::NOTHING) {
         _current_obd_pid = obd_pid_states::KPH;
-    } else {
-        AddPidIfNotExits(obd_pid_states::KPH);
     }
-}
 
-void Elm327Connect::oilTemp()
-{
-    if(!_emlConnected) return;
-
-    if(_current_obd_pid == obd_pid_states::NOTHING) {
-        _current_obd_pid = obd_pid_states::OILTEMP;
-    } else {
-        AddPidIfNotExits(obd_pid_states::OILTEMP);
-    }
+    AddPidIfNotExits(obd_pid_states::KPH);
 }
 
 void Elm327Connect::loop()
@@ -236,6 +258,33 @@ void Elm327Connect::loop()
     if(_current_obd_pid == obd_pid_states::NOTHING) return;
 
     switch(_current_obd_pid) {
+    case obd_pid_states::COOLANT:
+        _motor_State.engineCoolantTemp = _ELMduino.engineCoolantTemp();
+        if(_ELMduino.nb_rx_state == ELM_SUCCESS) {
+            if(_event != nullptr) {
+                _event(_current_obd_pid, _motor_State);
+            }
+            _current_obd_pid = obd_pid_states::NOTHING;
+        }
+        break;
+    case obd_pid_states::OILTEMP:
+        _motor_State.oilTemp = _ELMduino.oilTemp();
+        if(_ELMduino.nb_rx_state == ELM_SUCCESS) {
+            if(_event != nullptr) {
+                _event(_current_obd_pid, _motor_State);
+            }
+            _current_obd_pid = obd_pid_states::NOTHING;
+        }
+        break;
+    case obd_pid_states::INTAKE_AIR:
+        _motor_State.intakeAirTemp = _ELMduino.intakeAirTemp();
+        if(_ELMduino.nb_rx_state == ELM_SUCCESS) {
+            if(_event != nullptr) {
+                _event(_current_obd_pid, _motor_State);
+            }
+            _current_obd_pid = obd_pid_states::NOTHING;
+        }
+        break;
     case obd_pid_states::RPM:
         _motor_State.rpm = _ELMduino.rpm();
         if(_ELMduino.nb_rx_state == ELM_SUCCESS) {
@@ -246,16 +295,7 @@ void Elm327Connect::loop()
         }
         break;
     case obd_pid_states::KPH:
-        _motor_State.rpm = _ELMduino.kph();
-        if(_ELMduino.nb_rx_state == ELM_SUCCESS) {
-            if(_event != nullptr) {
-                _event(_current_obd_pid, _motor_State);
-            }
-            _current_obd_pid = obd_pid_states::NOTHING;
-        }
-        break;
-    case obd_pid_states::OILTEMP:
-        _motor_State.rpm = _ELMduino.oilTemp();
+        _motor_State.kph = _ELMduino.kph();
         if(_ELMduino.nb_rx_state == ELM_SUCCESS) {
             if(_event != nullptr) {
                 _event(_current_obd_pid, _motor_State);
@@ -273,12 +313,13 @@ void Elm327Connect::loop()
         _current_obd_pid = obd_pid_states::NOTHING;
     }
 
-    if(_ELMduino.nb_rx_state == ELM_SUCCESS) {
-        if(_obd_pid_list[0] != obd_pid_states::NOTHING) {
-            _current_obd_pid = _obd_pid_list[0];
+    if(_ELMduino.nb_rx_state == ELM_SUCCESS || _ELMduino.nb_rx_state == ELM_TIMEOUT) {
+        log_d("next entry %d", _obd_pid_list[1]);
+        if(_obd_pid_list[1] != obd_pid_states::NOTHING) {
+            _current_obd_pid = _obd_pid_list[1];
 
             for(auto i = 0; i < 19; i++) {
-                _obd_pid_list[i] == _obd_pid_list[i + 1];
+                _obd_pid_list[i] = _obd_pid_list[i + 1];
             }
             _obd_pid_list[19] = obd_pid_states::NOTHING;
         }

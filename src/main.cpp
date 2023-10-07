@@ -110,9 +110,11 @@ void loop()
                 elm327Connect->Disconnect();
             }
             if(command[0] == 'r') {
+                elm327Connect->coolantTemp();
+                elm327Connect->oilTemp();
+                elm327Connect->intakeAir();
                 elm327Connect->rpm();
                 elm327Connect->kph();
-                elm327Connect->oilTemp();
             }
             if(command == "mqtt") {
 #ifdef MQTT_ENABLED

@@ -28,10 +28,14 @@ struct MotorState {
         rpm = -1.0;
         kph = -1;
         oilTemp = -1.0;
+        engineCoolantTemp = -1.0;
+        intakeAirTemp = -1.0;
     }
     float rpm;
     int32_t kph;
     float oilTemp;
+    float engineCoolantTemp;
+    float intakeAirTemp;
 };
 
 
@@ -63,8 +67,10 @@ class Elm327Connect
     void ConnectSerial(byte index);
     void Disconnect();
     void ValueChangedCallback(ValueChangedEvent callback);
+    void coolantTemp();
+    void oilTemp();
+    void intakeAir();
     void rpm();
     void kph();
-    void oilTemp();
     void loop();
 };
