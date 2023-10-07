@@ -15,7 +15,7 @@
 
 #include "ELMduino.h"
 
-enum struct obd_pid_states { NOTHING, COOLANT, OILTEMP, INTAKE_AIR, RPM, KPH };
+enum struct obd_pid_states { NOTHING, COOLANT, OILTEMP, INTAKE_AIR, RPM, KPH, SUPPORTEDPID_1_20, MONITORSTATUS };
 
 struct btDevice {
     BTAddress address;
@@ -30,12 +30,16 @@ struct MotorState {
         oilTemp = -1.0;
         engineCoolantTemp = -1.0;
         intakeAirTemp = -1.0;
+        pid1_20 = 0;
+        motorState = 0;
     }
     float rpm;
     int32_t kph;
     float oilTemp;
     float engineCoolantTemp;
     float intakeAirTemp;
+    uint32_t pid1_20;
+    uint32_t motorState;
 };
 
 
@@ -72,5 +76,7 @@ class Elm327Connect
     void intakeAir();
     void rpm();
     void kph();
+    void supportedPID();
+    void monitorStatus();
     void loop();
 };

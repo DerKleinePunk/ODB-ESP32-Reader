@@ -12,6 +12,7 @@ c<index> connect Serial BT Device c2 -> Connect 2 Device from last scan.
 r -> read rpm and kph (km/h)
 mqtt -> search for mqtt
 light -> Switch State from LED_BUILTIN
+oi -> read supportet PID and Motorstate (MIL)
 ```
 
 ## Troubleshooting

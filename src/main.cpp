@@ -69,7 +69,12 @@ void odbStateChanged(obd_pid_states pid, MotorState state) {
     case obd_pid_states::KPH:
         Serial.printf("KPH: %f", state.kph);
         break;
-
+    case obd_pid_states::SUPPORTEDPID_1_20:
+        Serial.printf("Supported 1 - 20: %d", state.pid1_20);
+        break;
+    case obd_pid_states::MONITORSTATUS:
+        Serial.printf("MotorState: %d", state.motorState);
+        break;
     default:
         log_e("mission implementation for pid %d",pid);
     }
@@ -122,6 +127,10 @@ void loop()
                 elm327Connect->intakeAir();
                 elm327Connect->rpm();
                 elm327Connect->kph();
+            }
+            if(command[0] == 'oi') {
+                elm327Connect->supportedPID();
+                elm327Connect->monitorStatus();
             }
             if(command == "mqtt") {
 #ifdef MQTT_ENABLED

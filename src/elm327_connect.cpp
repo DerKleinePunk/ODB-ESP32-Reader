@@ -251,6 +251,28 @@ void Elm327Connect::kph()
     AddPidIfNotExits(obd_pid_states::KPH);
 }
 
+ void Elm327Connect::supportedPID()
+ {
+    if(!_emlConnected) return;
+
+    if(_current_obd_pid == obd_pid_states::NOTHING) {
+        _current_obd_pid = obd_pid_states::SUPPORTEDPID_1_20;
+    }
+
+    AddPidIfNotExits(obd_pid_states::SUPPORTEDPID_1_20);
+ }
+
+void Elm327Connect::monitorStatus()
+{
+    if(!_emlConnected) return;
+
+    if(_current_obd_pid == obd_pid_states::NOTHING) {
+        _current_obd_pid = obd_pid_states::MONITORSTATUS;
+    }
+
+    AddPidIfNotExits(obd_pid_states::MONITORSTATUS);
+}
+
 void Elm327Connect::loop()
 {
     if(!_emlConnected) return;
@@ -296,6 +318,24 @@ void Elm327Connect::loop()
         break;
     case obd_pid_states::KPH:
         _motor_State.kph = _ELMduino.kph();
+        if(_ELMduino.nb_rx_state == ELM_SUCCESS) {
+            if(_event != nullptr) {
+                _event(_current_obd_pid, _motor_State);
+            }
+            _current_obd_pid = obd_pid_states::NOTHING;
+        }
+        break;
+    case obd_pid_states::SUPPORTEDPID_1_20:
+        _motor_State.pid1_20 = _ELMduino.supportedPIDs_1_20();
+        if(_ELMduino.nb_rx_state == ELM_SUCCESS) {
+            if(_event != nullptr) {
+                _event(_current_obd_pid, _motor_State);
+            }
+            _current_obd_pid = obd_pid_states::NOTHING;
+        }
+        break;
+    case obd_pid_states::MONITORSTATUS:
+        _motor_State.motorState = _ELMduino.monitorStatus();
         if(_ELMduino.nb_rx_state == ELM_SUCCESS) {
             if(_event != nullptr) {
                 _event(_current_obd_pid, _motor_State);
