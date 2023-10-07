@@ -51,22 +51,29 @@ CommandReader commandReader;
 #endif
 
 void odbStateChanged(obd_pid_states pid, MotorState state) {
-    Serial.println(F("MotorState"));
+    Serial.print(F("MotorState"));
     switch (pid)
     {
+    case obd_pid_states::COOLANT:
+        Serial.printf("Engine Coolant Temp: %f", state.engineCoolantTemp);
+        break;
+    case obd_pid_states::OILTEMP:
+        Serial.printf("OIL TEMP: %f", state.oilTemp);
+        break;
+    case obd_pid_states::INTAKE_AIR:
+        Serial.printf("Intake Air Temp: %f", state.intakeAirTemp);
+        break;
     case obd_pid_states::RPM:
         Serial.printf("RPM: %f", state.rpm);
         break;
     case obd_pid_states::KPH:
         Serial.printf("KPH: %f", state.kph);
         break;
-    case obd_pid_states::OILTEMP:
-        Serial.printf("OIL TEMP: %f", state.oilTemp);
-        break;
+
     default:
         log_e("mission implementation for pid %d",pid);
     }
-   
+   Serial.println();
 }
 
 void setup()
@@ -90,7 +97,7 @@ void setup()
 void loop()
 {
 
-    if(wlan.Check()) {
+    if(!wlan.Check()) {
     }
 
     const auto commands = commandReader.GetCommand();

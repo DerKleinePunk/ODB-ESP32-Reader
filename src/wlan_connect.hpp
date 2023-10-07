@@ -8,6 +8,7 @@ private:
     const char* _ssid;
     const char* _password;
     WiFiClient _netClient;
+    u_long _lastCheck;
 public:
     WlanConnect(const char* ssid, const char* password);
     ~WlanConnect();

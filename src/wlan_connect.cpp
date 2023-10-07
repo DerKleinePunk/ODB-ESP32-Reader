@@ -15,7 +15,7 @@ WlanConnect::~WlanConnect()
 bool WlanConnect::Init()
 {
     auto count = 0;
-    // Wi-Fi connection
+    WiFi.mode(WIFI_STA);
     WiFi.begin(_ssid, _password);
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
@@ -35,7 +35,9 @@ bool WlanConnect::Init()
     } else {
         Serial.println("WiFi not connected!!");
     }
+    WiFi.setAutoReconnect(false);
 
+    _lastCheck = millis();
     return false;
 }
 
@@ -45,9 +47,22 @@ bool WlanConnect::Check()
         return true;
     }
 
-    //todo Reconnect
-    Serial.println("WiFi not connected!!");
-    
+    if(WiFi.status() != WL_DISCONNECTED) {
+        log_d("WLAN Disconnect");
+        WiFi.disconnect();
+        WiFi._setStatus(WL_DISCONNECTED);
+    }
+
+    if((unsigned long)(millis() - _lastCheck) > 15000) {
+        log_d("Try Reconnect");
+        if(WiFi.reconnect()) {
+            Serial.println("WiFi reconnected");
+        } else {
+            Serial.println("WiFi not connected");
+        }
+        _lastCheck = millis();
+    }
+ 
     return false;
 }
 
