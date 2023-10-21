@@ -38,6 +38,7 @@ oi -> read supportet PID and Motorstate (MIL)
 + [arduino-mqtt](https://github.com/256dpi/arduino-mqtt)
 + [DnWiFiDoorLock](https://github.com/MacDada/DnWiFiDoorLock)
 + [platformio-version-increment](https://community.platformio.org/t/platformio-version-increment/13945/21)
++ [jake-is-ESD-protected](https://github.com/jake-is-ESD-protected)
 
 ## Remindings
  pio lib install "256dpi/MQTT"
